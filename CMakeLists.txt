@@ -21,6 +21,10 @@
 cmake_minimum_required(VERSION 3.7)
 project(janetui)
 
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
+set(CMAKE_SHARED_MODULE_PREFIX "")
+set(CMAKE_STATIC_LIBRARY_PREFIX "")
+
 # Set Some Variables
 set(TARGET_NAME ${PROJECT_NAME})
 set(CMAKE_C_STANDARD 99)
@@ -47,3 +51,7 @@ set(_COMMON_LDFLAGS "")
 # Build our library
 add_library(${TARGET_NAME} MODULE ${SOURCES})
 target_link_libraries(${TARGET_NAME} libui glib-2.0 gtk-3 gdk-3)
+
+add_library("${TARGET_NAME}STATIC" STATIC ${SOURCES})
+target_link_libraries("${TARGET_NAME}STATIC" libui glib-2.0 gtk-3 gdk-3)
+set_target_properties("${TARGET_NAME}STATIC" PROPERTIES OUTPUT_NAME ${TARGET_NAME})
