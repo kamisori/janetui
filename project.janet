@@ -41,6 +41,11 @@
   :cflags [;default-cflags ;cflags]
   :lflags [;default-lflags ;lflags])
 
+
+#(declare-executable
+#  :name "doc-me-this"
+#  :entry "doc-me-this.janet")
+
 (comment 
 (declare-executable
   :name "uwudemo"
