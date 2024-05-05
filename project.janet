@@ -6,24 +6,7 @@
 
 (def o (os/which))
 
-(def cflags
-  (case o
-    :macos '["-Ilibui" "-Ilibui/darwin"]
-    :windows ["-Ilibui" "-Ilibui/windows" ]
-    #default
-    '["-Ilibui" "-Ilibui/unix"]))
-
-(def lflags
-  (case o
-    :linux '[ "build/libui/out/ui.a" "-lglib-2.0" "-lgtk-3" "-lgdk-3"]
-    #default
-    '[ "build/libui/out/ui.a" "-lglib-2.0" "-lgtk-3" "-lgdk-3"]))
-
-
-(declare-bin
-  :main "./build/janetui.so")
-
-(rule "cmake" ["CMakeLists.txt"]
+(rule "build/janetui.so" ["CMakeLists.txt"]
       (do
         (assert
           (and
@@ -32,14 +15,20 @@
             (zero?
               (os/execute ["cmake" "--build" "build"] :p)) "--build build"))))
 
-(add-input "build" "cmake")
-(add-output "cmake" "build/libui/out/ui.a")
+(add-dep "build" "build/janetui.so")
 
 (declare-native
   :name "janetui"
   :source ["main.c"]
-  :cflags [;default-cflags ;cflags]
-  :lflags [;default-lflags ;lflags])
+  :cflags [;default-cflags ;(case o
+                              :macos '["-Ilibui" "-Ilibui/darwin"]
+                              :windows ["-Ilibui" "-Ilibui/windows" ]
+                              #default
+                              '["-Ilibui" "-Ilibui/unix"])]
+  :lflags [;default-lflags ;(case o
+                              :linux '[ "build/libui/out/ui.a" "-lglib-2.0" "-lgtk-3" "-lgdk-3"]
+                              #default
+                              '[ "build/libui/out/ui.a" "-lglib-2.0" "-lgtk-3" "-lgdk-3"])])
 
 
 #(declare-executable
