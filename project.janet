@@ -5,39 +5,49 @@
   :repo "https://github.com/janet-lang/janetui.git")
 
 (def o (os/which))
+(defn buildwithcmake [keyword]
+    (do
+      (pp [:START:::::: keyword])
+      (pp (os/cwd))
+      (os/cd "libui")
+      (pp (os/cwd))
+      (assert
+        (and
+          (zero?
+            (os/execute ["cmake" "-B" "build" "-DBUILD_SHARED_LIBS=OFF"] :p))
+          (zero?
+            (os/execute ["cmake" "--build" "build"] :p))))
+      (pp (os/cwd))
+      (os/cd "..")
+      (pp (os/cwd))
+      (pp [:DONE::::::::: keyword])))
 
-(rule "build/janetui.so" ["CMakeLists.txt"]
-      (do
-        (assert
-          (and
-            (zero?
-              (os/execute ["cmake" "-B" "build"] :p))
-            (zero?
-              (os/execute ["cmake" "--build" "build"] :p)) "--build build"))))
+# when trying to not calling this in root, then the build process is jumbled around.... idk how to explain...
+#comment this line to see it not finding main.c while buildwithcmake is still running:
+(buildwithcmake :building-static-libui-with-cmake-now)
 
-(add-dep "build" "build/janetui.so")
+(rule "libui/build/out/libui.a" ["libui"]
+    (buildwithcmake :building-static-libui-with-cmake-now:WITH:::::::::::::::::RULE))
+
+(add-dep "build" "libui/build/out/libui.a")
 
 (declare-native
   :name "janetui"
   :source ["main.c"]
   :cflags [;default-cflags ;(case o
                               :macos '["-Ilibui" "-Ilibui/darwin"]
-                              :windows ["-Ilibui" "-Ilibui/windows" ]
+                              :windows '["-Ilibui" "-Ilibui/windows" ]
                               #default
                               '["-Ilibui" "-Ilibui/unix"])]
   :lflags [;default-lflags ;(case o
-                              :linux '[ "build/libui/out/ui.a" "-lglib-2.0" "-lgtk-3" "-lgdk-3"]
+                              :linux '[ "libui/build/out/libui.a" "-lglib-2.0" "-lgtk-3" "-lgdk-3"]
                               #default
-                              '[ "build/libui/out/ui.a" "-lglib-2.0" "-lgtk-3" "-lgdk-3"])])
-
-
-#(declare-executable
-#  :name "doc-me-this"
-#  :entry "doc-me-this.janet")
+                              '[ "libui/build/out/libui.a" "-lglib-2.0" "-lgtk-3" "-lgdk-3"])])
 
 (comment 
 (declare-executable
-  :name "uwudemo"
-  :entry "test.janet"
-  :install false)
+  :name "doc-me-this"
+  :entry "doc-me-this.janet"
+  :install false
+  :deps [(native-module :static)])
 )
