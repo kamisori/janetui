@@ -11,6 +11,7 @@
 (defn buildwithcmake []
     (do
       (os/cd "libui")
+      ## need to make this error more verbose
       (assert
         (and
           (zero?
