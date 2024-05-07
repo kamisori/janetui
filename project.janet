@@ -4,30 +4,22 @@
   :url "https://github.com/janet-lang/janetui"
   :repo "https://github.com/janet-lang/janetui.git")
 
+# build with --workers=1
+
 (def o (os/which))
-(defn buildwithcmake [keyword]
+
+(defn buildwithcmake []
     (do
-      (pp [:START:::::: keyword])
-      (pp (os/cwd))
       (os/cd "libui")
-      (pp (os/cwd))
       (assert
         (and
           (zero?
             (os/execute ["cmake" "-B" "build" "-DBUILD_SHARED_LIBS=OFF"] :p))
           (zero?
-            (os/execute ["cmake" "--build" "build"] :p))))
-      (pp (os/cwd))
-      (os/cd "..")
-      (pp (os/cwd))
-      (pp [:DONE::::::::: keyword])))
+            (os/execute ["cmake" "--build" "build"] :p))) "! use jpm build --workers=1 !")
+      (os/cd "..")))
 
-# when trying to not calling this in root, then the build process is jumbled around.... idk how to explain...
-#comment this line to see it not finding main.c while buildwithcmake is still running:
-(buildwithcmake :building-static-libui-with-cmake-now)
-
-(rule "libui/build/out/libui.a" ["libui"]
-    (buildwithcmake :building-static-libui-with-cmake-now:WITH:::::::::::::::::RULE))
+(rule "libui/build/out/libui.a" ["libui"] (buildwithcmake))
 
 (add-dep "build" "libui/build/out/libui.a")
 
