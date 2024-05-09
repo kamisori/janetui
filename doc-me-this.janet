@@ -1,3 +1,4 @@
+#!/usr/bin/env janet
 (import janetui :as ui)
 
 (defn main [& args]
